@@ -111,6 +111,47 @@ main{padding:6px var(--padR) 0 var(--padL);max-width:760px;margin:0 auto}
 .meta{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap}
 .meta .note{color:var(--ink);font-weight:550}
 .photos{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}
+.cam{flex:none;position:relative;width:56px;height:56px;border-radius:12px;border:1px solid var(--line);background:var(--surface) center/cover no-repeat;color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;margin-top:1px}
+.cam svg{width:22px;height:22px}
+.cam i{position:absolute;right:3px;bottom:3px;font-style:normal;font-size:10.5px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;border-radius:6px;padding:0 5px;line-height:16px}
+.card[class*="st-"] .cam:not([data-pid]){background:color-mix(in srgb,var(--surface) 60%,transparent)}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 8px}
+.sec h3{margin:0;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.sec small{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.take{display:grid;grid-template-columns:36px 72px 1fr 40px 32px;gap:6px;align-items:center;background:var(--surface-2);border-radius:12px;padding:6px 6px 6px 12px;margin-bottom:6px}
+.take.good{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.take b{font-variant-numeric:tabular-nums;font-size:15px}
+.take input,.ck input{min-width:0;width:100%;height:38px;border:1px solid transparent;border-radius:9px;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;padding:0 9px;outline:none}
+.take input:focus,.ck input:focus{border-color:var(--ink)}
+.take .tdur{font-variant-numeric:tabular-nums;text-align:center}
+.circ{height:38px;border-radius:9px;border:0;background:transparent;font-size:20px;cursor:pointer;line-height:1}
+.x{height:38px;border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.takebar{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.takebar .btn{height:50px;font-size:15px}
+.btn.rec{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.rec.on{background:#C2372E;border-color:#C2372E;color:#fff}
+.btn.rec b{font-variant-numeric:tabular-nums;margin-left:4px}
+.ck{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ck .box{flex:none;width:34px;height:34px;border-radius:9px;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;padding:0}
+.ck .box svg{width:18px;height:18px;opacity:0}
+.ck.on .box{background:var(--check);border-color:var(--check);color:#fff}
+.ck.on .box svg{opacity:1}
+.ck.on input{text-decoration:line-through;color:var(--muted)}
+.ck.add input{background:var(--surface-2)}
+.ck.add .btn{height:38px;padding:0 14px;font-size:14.5px}
+.rolling{color:#C2372E;font-weight:700}
+.rolling b{font-variant-numeric:tabular-nums}
+.jump.stop{background:#C2372E;color:#fff}
+.jump.stop svg{display:none}
+.jump.stop b{font-variant-numeric:tabular-nums;margin-left:4px}
+.fields.editf{grid-template-columns:repeat(2,1fr)}
+.fld.edit{display:flex;flex-direction:column;gap:3px}
+.fld.edit input,.fld.edit textarea,.fld.edit select{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;font-weight:600;padding:2px 0;outline:none;-webkit-appearance:none;appearance:none}
+.fld.edit textarea{font-weight:500;resize:none;line-height:1.4}
+.fld.edit select{text-transform:uppercase;font-size:15px}
+.fld.edit:focus-within{box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.danger{color:#C2372E}
+.addshot{width:100%;height:46px;border-radius:14px;border:1.5px dashed var(--line);background:transparent;color:var(--muted);font-size:14.5px;font-weight:650;cursor:pointer;margin:0 0 8px}
 .ph{flex:none;width:96px;height:96px;border-radius:12px;background:var(--surface-2) center/cover no-repeat;border:1px solid var(--line);cursor:pointer;padding:0}
 .ph.add{display:grid;place-items:center;color:var(--muted);font-size:12.5px;font-weight:650;background:var(--surface)}
 .ph.add svg{width:24px;height:24px;display:block;margin:0 auto 4px}
@@ -188,6 +229,7 @@ textarea.note:focus{border-color:var(--ink)}
 <div id="toast"></div>
 <input type="file" id="file" hidden>
 <input type="file" id="photoIn" accept="image/*" multiple hidden>
+<input type="file" id="photoCam" accept="image/*" capture="environment" hidden>
 <div class="viewer" id="viewer" hidden><div class="vbar"><button class="btn" id="vDel">Delete photo</button><button class="btn" id="vClose">Done</button></div><img id="vImg" alt="Shot photo"></div>
 
 <script>
@@ -206,7 +248,7 @@ function norm(o){
   const p = Object.assign({title:"", subtitle:"", scenes:[]}, o || {});
   p.scenes = (Array.isArray(p.scenes) ? p.scenes : []).map(sc => {
     sc = Object.assign({}, sc); sc.id = sc.id || uid(); sc.heading = sc.heading || ""; sc.color = sc.color || ""; sc.notes = sc.notes || "";
-    sc.rows = (Array.isArray(sc.rows) ? sc.rows : []).map(r => { r = Object.assign({}, r); r.id = r.id || uid(); FIELDS.forEach(k => r[k] = r[k] == null ? "" : String(r[k])); r.status = r.status || ""; r.flag = !!r.flag; r.setNote = r.setNote || ""; r.doneAt = r.doneAt || null; r.photos = Array.isArray(r.photos) ? r.photos.filter(x => typeof x === "string") : []; return r; });
+    sc.rows = (Array.isArray(sc.rows) ? sc.rows : []).map(r => { r = Object.assign({}, r); r.id = r.id || uid(); FIELDS.forEach(k => r[k] = r[k] == null ? "" : String(r[k])); r.status = r.status || ""; r.flag = !!r.flag; r.setNote = r.setNote || ""; r.doneAt = r.doneAt || null; r.photos = Array.isArray(r.photos) ? r.photos.filter(x => typeof x === "string") : []; r.takes = Array.isArray(r.takes) ? r.takes.filter(t => t && typeof t === "object").map(t => ({n:+t.n || 0, dur:+t.dur || 0, good:!!t.good, note:String(t.note || ""), at:t.at || null})) : []; r.checklist = Array.isArray(r.checklist) ? r.checklist.filter(c => c && typeof c === "object").map(c => ({id:c.id || uid(), text:String(c.text || ""), done:!!c.done})) : []; return r; });
     return sc;
   });
   return p;
@@ -287,13 +329,17 @@ function render(){
     }
     h += '<div class="scene"' + sceneAttr(sc) + '><b>' + esc(sc.heading || "Untitled scene") + '</b><small>' + d + ' of ' + sc.rows.length + ' done</small></div>';
     h += vis.map(r => cardHTML(r, next && r.id === next.id)).join("");
+    if (F.filter !== "done") h += '<button class="addshot" data-add="' + sc.id + '">+ Add shot to this scene</button>';
   }
   if (!h){
     h = F.filter === "done" ? '<div class="finished"><b>Nothing checked off yet</b>Tap the circle on a shot when it’s in the can.</div>'
                             : '<div class="finished"><b>That’s a wrap</b>Every shot here is done.</div>';
   }
   list.innerHTML = h;
+  fillCardThumbs();
   const jb = $("#jump");
+  if (rolling && findRow(rolling.id)){ jb.hidden = false; jb.classList.add("stop"); $("#jumpTxt").innerHTML = "Stop take " + esc(idOf(findRow(rolling.id).r)) + " <b data-roll>" + fmtDur((Date.now() - rolling.start) / 1000) + "</b>"; return; }
+  jb.classList.remove("stop");
   if (next && F.filter !== "done"){ jb.hidden = false; $("#jumpTxt").textContent = "Up next: " + idOf(next); } else jb.hidden = true;
 }
 const idOf = r => (r.setup || "?") + "." + (r.shot || "?");
@@ -304,7 +350,10 @@ function cardHTML(r, isNext){
   if (r.status === "done" && r.doneAt) meta.push("Done " + fmtClock(r.doneAt));
   const m = rowMin(r); if (m) meta.push(fmtMin(m));
   if (r.photos.length) meta.push(plural(r.photos.length, "photo"));
-  if (r.setNote) meta.push('<span class="note">Note: ' + esc(r.setNote) + '</span>');
+  if (rolling && rolling.id === r.id) meta.push('<span class="rolling">● Rolling <b data-roll>' + fmtDur((Date.now() - rolling.start) / 1000) + '</b></span>');
+  if (r.takes.length){ const g = r.takes.filter(t => t.good).length; meta.push(plural(r.takes.length, "take") + (g ? ", " + g + " circled" : "")); }
+  if (r.checklist.length) meta.push(r.checklist.filter(c => c.done).length + "/" + r.checklist.length + " checklist");
+  if (r.setNote) meta.push('<span class="note">Script: ' + esc(r.setNote) + '</span>');
   return '<div class="sw" data-id="' + r.id + '"><div class="sw-bg"><span class="d">' + CHECK + 'Done</span><span class="h">On hold<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 6v12M15 6v12"/></svg></span></div><div class="card' + (r.status ? " st-" + r.status : "") + (r.flag ? " flag" : "") + (isNext ? " next" : "") + '" data-id="' + r.id + '" id="r-' + r.id + '">' +
     '<button class="chk" aria-label="' + (r.status === "done" ? "Uncheck " : "Check off ") + esc(idOf(r)) + '">' + CHECK + '</button>' +
     '<div class="cb"><div class="r1"><span class="id">' + esc(idOf(r)) + '</span><span class="subj">' + esc(r.subject || "No subject") + '</span>' +
@@ -312,7 +361,7 @@ function cardHTML(r, isNext){
     (tech.length ? '<div class="tech">' + tech.map(t => '<span>' + esc(t) + '</span>').join("") + '</div>' : "") +
     (r.notes ? '<div class="desc">' + esc(r.notes) + '</div>' : "") +
     (meta.length ? '<div class="meta">' + meta.map(x => x.startsWith("<span") ? x : '<span>' + esc(x) + '</span>').join("") + '</div>' : "") +
-    '</div></div></div>';
+    '</div>' + ((r.photos || [])[0] ? '<button class="cam" data-cam="' + r.id + '" data-pid="' + r.photos[0] + '" aria-label="Photos for ' + esc(idOf(r)) + '">' + (r.photos.length > 1 ? '<i>' + r.photos.length + '</i>' : "") + '</button>' : '<button class="cam" data-cam="' + r.id + '" aria-label="Take a photo for ' + esc(idOf(r)) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>') + '</div></div>';
 }
 function renderEmpty(){
   $("#top").hidden = true; $("#jump").hidden = true;
@@ -320,11 +369,12 @@ function renderEmpty(){
 }
 
 /* ---------- actions ---------- */
-function snapRow(r){ return {id:r.id, status:r.status, doneAt:r.doneAt, setNote:r.setNote}; }
+function snapRow(r){ const o = {id:r.id, status:r.status, doneAt:r.doneAt, setNote:r.setNote, flag:r.flag, photos:(r.photos || []).slice(), takes:JSON.parse(JSON.stringify(r.takes || [])), checklist:JSON.parse(JSON.stringify(r.checklist || []))}; FIELDS.forEach(k => o[k] = r[k]); return o; }
 function pushUndo(rows){ undoStack.push(rows.map(snapRow)); if (undoStack.length > 100) undoStack.shift(); }
 function undo(){
   const s = undoStack.pop(); if (!s) return;
-  s.forEach(x => { const f = findRow(x.id); if (f){ f.r.status = x.status; f.r.doneAt = x.doneAt; f.r.setNote = x.setNote; } });
+  if (typeof s === "function"){ s(); persist(); render(); return; }
+  s.forEach(x => { const f = findRow(x.id); if (f){ const {id, ...rest} = x; Object.assign(f.r, rest); } });
   persist(); render(); if (sheetRow) openSheet(sheetRow);
 }
 function buzz(){ try { navigator.vibrate && navigator.vibrate(12); } catch {} }
@@ -349,31 +399,130 @@ function toggleDone(id){
   toast(res === "done" ? "Checked off " + idOf(f.r) : "Unchecked " + idOf(f.r), true);
 }
 
+/* ---------- editing ---------- */
+let editNewId = null;
+const EDIT_FIELDS = [["setup","Set-up #"],["shot","Shot #"],["subject","Subject",1],["framing","Framing"],["lens","Lens"],["angle","Angle"],["movement","Movement"],["equipment","Equipment"],["camera","Camera"],["sound","Sound"],["setupTime","Set-up min"],["duration","Shot min"],["breakdown","Breakdown min"],["notes","Description",2]];
+const DEFAULT_LISTS = {framing:["EWS","WS","W","MS","MS (OTS)","MCU","CU","ECU","W to CU","Insert"], camera:["A CAM","B CAM","C CAM"], angle:["Eyelevel","High Angle","Low Angle","Extreme Low","Overhead","Dutch","POV","Item"], movement:["Static","Pan","Tilt","Push-In","Pull-Out","Tracking Shot","Crane","Zoom"], equipment:["Sticks / Tripod","Handheld","Dolly","Gimbal","Slider","Steadicam"], lens:["18 mm","24 mm","28 mm","35 mm","50 mm","85 mm","100 mm","135 mm"], sound:["Boom","Lav","MOS","Wild"]};
+function listsOf(){ const L = Object.assign({}, DEFAULT_LISTS, (P && P.lists) || {}); return L; }
+function openEditor(id){
+  const f = findRow(id); if (!f) return; const r = f.r; sheetRow = id; sheetMode = "edit";
+  const L = listsOf();
+  const inp = ([k, l, w]) => {
+    const list = Array.isArray(L[k]) && L[k].length ? ' list="dl-' + k + '"' : "";
+    const mode = ["setupTime","duration","breakdown"].includes(k) ? ' inputmode="decimal"' : "";
+    return '<label class="fld edit' + (w ? " wide" : "") + '"><span>' + l + '</span>' + (w === 2 ? '<textarea data-k="' + k + '" rows="3">' + esc(r[k]) + '</textarea>' : '<input data-k="' + k + '" value="' + esc(r[k]) + '"' + list + mode + ' autocomplete="off" autocorrect="off" autocapitalize="' + (k === "subject" ? "words" : "off") + '">') + '</label>';
+  };
+  const dls = Object.keys(L).filter(k => Array.isArray(L[k])).map(k => '<datalist id="dl-' + k + '">' + L[k].map(o => '<option value="' + esc(o) + '">').join("") + '</datalist>').join("");
+  const scOpts = P.scenes.map(x => '<option value="' + x.id + '"' + (x.id === f.sc.id ? " selected" : "") + '>' + esc(x.heading || "Untitled scene") + '</option>').join("");
+  const isNew = editNewId === id;
+  sheet.innerHTML = '<div class="grab"></div><div class="sh-head"><h2><small>' + (isNew ? "New shot" : "Edit shot") + '</small>' + esc(idOf(r)) + '</h2><button class="icon" data-act="canceledit" aria-label="Cancel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+    '<div class="fields editf"><label class="fld edit wide"><span>Scene</span><select data-k="_scene">' + scOpts + '</select></label>' + EDIT_FIELDS.map(inp).join("") + '</div>' + dls +
+    '<div class="navrow"><button class="btn" data-act="canceledit">Cancel</button><button class="btn primary" data-act="saveedit">' + (isNew ? "Add shot" : "Save") + '</button></div>' +
+    (isNew ? "" : '<button class="btn wide danger" data-act="delshot" style="margin-top:10px">Delete shot</button>');
+  if (!sheet.classList.contains("show")) showSheet();
+  sheet.scrollTop = 0;
+}
+function saveEditor(){
+  const f = findRow(sheetRow); if (!f) return;
+  const wasNew = editNewId === f.r.id;
+  if (!wasNew) pushUndo([f.r]);
+  sheet.querySelectorAll("[data-k]").forEach(el => { const k = el.dataset.k; if (k === "_scene") return; f.r[k] = k === "notes" ? el.value.replace(/\s+$/, "") : el.value.trim(); });
+  const to = sheet.querySelector('[data-k="_scene"]').value;
+  if (to !== f.sc.id){ const dest = P.scenes.find(x => x.id === to); if (dest){ f.sc.rows = f.sc.rows.filter(x => x !== f.r); dest.rows.push(f.r); } }
+  const L = P.lists || (P.lists = {});
+  ["framing","lens","angle","movement","equipment","camera","sound"].forEach(k => { const v = f.r[k]; if (v){ L[k] = L[k] || (DEFAULT_LISTS[k] || []).slice(); if (!L[k].some(o => o.toLowerCase() === v.toLowerCase())) L[k].push(v); } });
+  editNewId = null;
+  persist(); render(); openSheet(f.r.id);
+  toast(wasNew ? "Added " + idOf(f.r) : "Saved " + idOf(f.r), !wasNew);
+}
+function cancelEditor(){
+  if (editNewId && editNewId === sheetRow){ closeSheet(); return; }
+  openSheet(sheetRow);
+}
+function addShot(scId){
+  const sc = P.scenes.find(x => x.id === scId); if (!sc) return;
+  const all = P.scenes.flatMap(x => x.rows), last = sc.rows[sc.rows.length - 1];
+  const r = {id:uid(), status:"", flag:false, setNote:"", doneAt:null, photos:[]}; FIELDS.forEach(k => r[k] = "");
+  if (last){
+    ["setup","framing","camera","angle","movement","equipment","lens","sound"].forEach(k => r[k] = last[k]);
+    r.shot = String(Math.max(0, ...all.filter(x => x.setup.trim() === r.setup.trim()).map(x => parseFloat(x.shot) || 0)) + 1);
+  } else { r.camera = "A CAM"; r.setup = String(Math.max(0, ...all.map(x => parseFloat(x.setup) || 0)) + 1); r.shot = "1"; }
+  sc.rows.push(r); editNewId = r.id; openEditor(r.id);
+}
+function deleteShot(id){
+  const f = findRow(id); if (!f) return; const idx = f.sc.rows.indexOf(f.r), sc = f.sc, row = f.r;
+  confirmSheet("Delete shot " + idOf(row) + "?", "It will be removed from this phone’s shot list. You can undo right after.", "Delete shot", () => {
+    sc.rows = sc.rows.filter(x => x !== row);
+    undoStack.push(() => { sc.rows.splice(Math.min(idx, sc.rows.length), 0, row); });
+    persist(); render(); toast("Deleted " + idOf(row), true);
+  });
+}
+
+/* ---------- takes, timer, checklist ---------- */
+let rolling = null;
+try { rolling = JSON.parse(localStorage.getItem("onset.roll") || "null"); } catch {}
+function saveRoll(){ try { localStorage.setItem("onset.roll", JSON.stringify(rolling)); } catch {} }
+function fmtDur(sec){ sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0"); }
+function parseDur(v){ v = String(v || "").trim(); if (!v) return 0; const p = v.split(":").map(x => parseFloat(x) || 0); if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2]; if (p.length === 2) return p[0] * 60 + p[1]; return parseFloat(v.replace(/[^\d.]/g, "")) || 0; }
+function takesHTML(r){
+  const run = rolling && rolling.id === r.id;
+  return '<div class="sec"><h3>Takes</h3>' + (r.takes.length ? '<small>' + plural(r.takes.length, "take") + (r.takes.some(t => t.good) ? ", " + r.takes.filter(t => t.good).length + " circled" : "") + '</small>' : "") + '</div>' +
+    r.takes.map((t, i) => '<div class="take' + (t.good ? " good" : "") + '"><b>T' + t.n + '</b><input class="tdur" data-take-dur="' + i + '" value="' + (t.dur ? fmtDur(t.dur) : "") + '" placeholder="0:00" inputmode="numeric" aria-label="Take ' + t.n + ' length"><input class="tnote" data-take-note="' + i + '" value="' + esc(t.note) + '" placeholder="Note" aria-label="Take ' + t.n + ' note"><button class="circ" data-take-good="' + i + '" aria-pressed="' + t.good + '" aria-label="Circle take ' + t.n + '">' + (t.good ? "●" : "○") + '</button><button class="x" data-take-del="' + i + '" aria-label="Delete take ' + t.n + '">×</button></div>').join("") +
+    '<div class="takebar">' + (run ? '<button class="btn rec on" data-act="stopTake">■ Stop take <b data-roll>' + fmtDur((Date.now() - rolling.start) / 1000) + '</b></button>' : '<button class="btn rec" data-act="startTake">● Start take ' + (nextTakeNo(r)) + '</button>') + '<button class="btn" data-act="addTake">+ Log take</button></div>';
+}
+function checklistHTML(r){
+  return '<div class="sec"><h3>Checklist</h3>' + (r.checklist.length ? '<small>' + r.checklist.filter(c => c.done).length + ' of ' + r.checklist.length + '</small>' : "") + '</div>' +
+    r.checklist.map((c, i) => '<div class="ck' + (c.done ? " on" : "") + '"><button class="box" data-ck="' + i + '" aria-pressed="' + c.done + '" aria-label="Check item">' + CHECK + '</button><input data-ck-text="' + i + '" value="' + esc(c.text) + '" aria-label="Checklist item"><button class="x" data-ck-del="' + i + '" aria-label="Delete item">×</button></div>').join("") +
+    '<div class="ck add"><input id="ckNew" placeholder="Add an item, like “slate shows 2.3”" enterkeyhint="done"><button class="btn" data-act="addItem">Add</button></div>';
+}
+const nextTakeNo = r => Math.max(0, ...r.takes.map(t => t.n)) + 1;
+function startTake(id){
+  if (rolling) stopTake(true);
+  rolling = {id, start:Date.now()}; saveRoll(); buzz(); render(); if (sheetRow) openSheet(sheetRow, true); tick();
+}
+function stopTake(quiet){
+  if (!rolling) return; const f = findRow(rolling.id); const dur = (Date.now() - rolling.start) / 1000, start = rolling.start;
+  rolling = null; saveRoll();
+  if (f){ pushUndo([f.r]); const n = nextTakeNo(f.r); f.r.takes.push({n, dur:Math.round(dur), good:false, note:"", at:start}); persist(); if (!quiet) toast("Take " + n + " of " + idOf(f.r) + ": " + fmtDur(dur), true); }
+  buzz(); render(); if (sheetRow && sheetMode === "shot") openSheet(sheetRow, true);
+}
+let tickT = null;
+function tick(){
+  clearInterval(tickT); if (!rolling) return;
+  tickT = setInterval(() => { if (!rolling){ clearInterval(tickT); return; } const t = fmtDur((Date.now() - rolling.start) / 1000); document.querySelectorAll("[data-roll]").forEach(el => el.textContent = t); }, 500);
+}
+function takeEdit(fn){ const f = findRow(sheetRow); if (!f) return; pushUndo([f.r]); fn(f.r); persist(); render(); openSheet(f.r.id, true); }
+function addItem(){ const inp = $("#ckNew"); const v = inp && inp.value.trim(); if (!v) return; takeEdit(r => r.checklist.push({id:uid(), text:v, done:false})); const n = $("#ckNew"); if (n) n.focus(); }
+
 /* ---------- sheet ---------- */
 let sheetRow = null, sheetMode = null;
 const sheet = $("#sheet"), backdrop = $("#backdrop");
 function showSheet(){ $("#toast").style.display = "none"; backdrop.classList.add("show"); sheet.classList.add("show"); document.body.style.overflow = "hidden"; }
 function closeSheet(){
+  if (sheetMode === "edit" && editNewId){ const f = findRow(editNewId); if (f) f.sc.rows = f.sc.rows.filter(x => x !== f.r); editNewId = null; render(); }
   const ta = sheet.querySelector("textarea.note"); if (ta && sheetRow) saveNote(ta.value);
   sheet.classList.remove("show"); backdrop.classList.remove("show"); document.body.style.overflow = ""; sheetRow = null; sheetMode = null;
 }
 function flatIds(){ const scenes = F.scene === "all" ? P.scenes : P.scenes.filter(s => s.id === F.scene); return scenes.flatMap(s => s.rows.map(r => r.id)); }
-function openSheet(id){
+function openSheet(id, keepScroll){
+  const prevScroll = sheet.scrollTop;
   const f = findRow(id); if (!f) return; const r = f.r; sheetRow = id; sheetMode = "shot";
   const fld = (l, v, wide) => v ? '<div class="fld' + (wide ? " wide" : "") + '"><span>' + l + '</span><b>' + esc(v) + '</b></div>' : "";
   const ids = flatIds(), i = ids.indexOf(id);
   const m = rowMin(r);
-  sheet.innerHTML = '<div class="grab"></div><div class="sh-head"><h2><small>' + esc(f.sc.heading || "Untitled scene") + '</small>Shot ' + esc(idOf(r)) + '</h2><button class="icon" data-act="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+  sheet.innerHTML = '<div class="grab"></div><div class="sh-head"><h2><small>' + esc(f.sc.heading || "Untitled scene") + '</small>Shot ' + esc(idOf(r)) + '</h2><button class="icon" data-act="edit" aria-label="Edit shot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button><button class="icon" data-act="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
     '<div class="fields">' + fld("Subject", r.subject, true) + fld("Framing", r.framing) + fld("Lens", r.lens) + fld("Angle", r.angle) + fld("Movement", r.movement) + fld("Equipment", r.equipment) + fld("Camera", r.camera) + fld("Sound", r.sound) +
     fld("Set-up", r.setupTime && (/^\d+(\.\d+)?$/.test(r.setupTime.trim()) ? r.setupTime + " min" : r.setupTime)) + fld("Duration", r.duration && (/^\d+(\.\d+)?$/.test(r.duration.trim()) ? r.duration + " min" : r.duration)) + fld("Breakdown", r.breakdown && (/^\d+(\.\d+)?$/.test(r.breakdown.trim()) ? r.breakdown + " min" : r.breakdown)) + (m ? fld("Total time", fmtMin(m)) : "") +
     fld("Description", r.notes, true) + '</div>' +
     (r.status === "done" && r.doneAt ? '<div class="lbl">Checked off at ' + fmtClock(r.doneAt) + '</div>' : "") +
     '<div class="sts">' + STATUSES.map(([v, l]) => '<button class="st' + (r.status === v ? " on" : "") + '" data-st="' + v + '"><i style="background:var(--st-' + v + ');border-color:var(--st-' + v + '-b)"></i>' + l + '</button>').join("") + '</div>' +
-    '<div class="lbl">Photos</div><div class="photos" id="shPhotos">' + r.photos.map(pid => '<button class="ph" data-pid="' + pid + '" aria-label="View photo"></button>').join("") + '<button class="ph add" data-act="addphoto"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Add photo</span></button></div>' +
-    '<div class="lbl">On-set note</div><textarea class="note" rows="2" placeholder="Takes, issues, what to fix…">' + esc(r.setNote) + '</textarea>' +
+    '<div class="lbl">Photos</div><div class="photos" id="shPhotos">' + r.photos.map(pid => '<button class="ph" data-pid="' + pid + '" aria-label="View photo"></button>').join("") + '<button class="ph add" data-act="campho"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Camera</span></button><button class="ph add" data-act="addphoto"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8 8.5"/></svg>Library</span></button></div>' +
+    takesHTML(r) +
+    '<div class="sec"><h3>Script notes</h3></div><textarea class="note" rows="3" placeholder="Continuity, dialogue changes, lens or slate info, what to fix…">' + esc(r.setNote) + '</textarea>' +
+    checklistHTML(r) +
     '<div class="navrow"><button class="btn" data-nav="-1"' + (i <= 0 ? " disabled" : "") + '>‹ Previous</button><button class="btn primary" data-nav="1"' + (i < 0 || i >= ids.length - 1 ? " disabled" : "") + '>Next shot ›</button></div>';
   if (!sheet.classList.contains("show")) showSheet();
-  sheet.scrollTop = 0;
+  sheet.scrollTop = keepScroll ? prevScroll : 0;
   fillThumbs();
 }
 async function fillThumbs(){
@@ -441,24 +590,35 @@ const idb = (() => {
 })();
 async function getPhoto(id){ if (photoCache.has(id)) return photoCache.get(id); try { const d = await idb.get(id); if (d) photoCache.set(id, d); return d || null; } catch { return null; } }
 async function putPhoto(id, d){ photoCache.set(id, d); try { await idb.set(id, d); } catch {} }
-function readImage(file){
+function readImage(file, maxBytes = 180000){
   return new Promise((res, rej) => {
+    if (file.type && !file.type.startsWith("image/")){ rej(new Error("type")); return; }
     const fr = new FileReader();
     fr.onload = () => { const img = new Image(); img.onload = () => {
-      const max = 1280, k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
-      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      res(c.toDataURL("image/jpeg", .72));
+      let max = 1280, q = .72, out = "";
+      for (let i = 0; i < 10; i++){
+        const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+        const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+        out = c.toDataURL("image/jpeg", q);
+        if (out.length * .75 <= maxBytes) break;
+        if (q > .52) q -= .1; else max = Math.round(max * .8);
+      }
+      res(out);
     }; img.onerror = () => rej(new Error("img")); img.src = fr.result; };
     fr.onerror = () => rej(new Error("read")); fr.readAsDataURL(file);
   });
 }
-$("#photoIn").addEventListener("change", async e => {
-  const files = [...e.target.files]; e.target.value = ""; if (!files.length || !sheetRow) return;
-  const f = findRow(sheetRow); if (!f) return; let added = 0;
-  for (const file of files){ try { const d = await readImage(file), id = "ph_" + uid() + uid(); await putPhoto(id, d); f.r.photos.push(id); added++; } catch {} }
-  if (added){ persist(); render(); openSheet(f.r.id); toast(added === 1 ? "Photo added" : plural(added, "photo") + " added"); }
+let photoTarget = null;
+async function addPhotosTo(id, files){
+  const f = findRow(id); if (!f || !files.length) return;
+  toast(files.length === 1 ? "Adding photo…" : "Adding " + files.length + " photos…");
+  let added = 0;
+  for (const file of files){ try { const d = await readImage(file), pid = "ph_" + uid() + uid(); await putPhoto(pid, d); f.r.photos.push(pid); added++; } catch {} }
+  if (added){ persist(); render(); if (sheetRow === id && sheetMode === "shot") openSheet(id, true); toast((added === 1 ? "Photo added to " : added + " photos added to ") + idOf(f.r)); }
   else toast("That photo couldn’t be read. Try a JPEG or PNG.");
-});
+}
+["#photoIn", "#photoCam"].forEach(sel => $(sel).addEventListener("change", e => { const files = [...e.target.files]; e.target.value = ""; const id = photoTarget || sheetRow; photoTarget = null; if (id) addPhotosTo(id, files); }));
 let viewing = null;
 async function openViewer(pid){ viewing = pid; $("#vImg").src = (await getPhoto(pid)) || ""; $("#viewer").hidden = false; }
 $("#vClose").onclick = () => { $("#viewer").hidden = true; viewing = null; };
@@ -467,11 +627,15 @@ $("#vDel").onclick = () => {
   f.r.photos = f.r.photos.filter(x => x !== viewing); persist(); $("#viewer").hidden = true; viewing = null; render(); openSheet(f.r.id); toast("Photo removed");
 };
 
+async function fillCardThumbs(){
+  for (const b of list.querySelectorAll(".cam[data-pid]")){ const d = await getPhoto(b.dataset.pid); if (d) b.style.backgroundImage = 'url("' + d + '")'; }
+}
+
 /* ---------- swipe ---------- */
 let sw = null, suppressClick = false;
 const swTh = card => Math.min(110, card.offsetWidth * .3);
 list.addEventListener("pointerdown", e => {
-  const card = e.target.closest(".card"); if (!card || e.target.closest(".chk")) return;
+  const card = e.target.closest(".card"); if (!card || e.target.closest(".chk, .cam")) return;
   if (e.pointerType === "mouse" && e.button !== 0) return;
   sw = {card, wrap:card.parentElement, id:card.dataset.id, x0:e.clientX, y0:e.clientY, dx:0, active:false, armed:false, pid:e.pointerId};
 });
@@ -519,6 +683,8 @@ function toast(msg, withUndo){
 list.addEventListener("click", e => {
   if (suppressClick){ suppressClick = false; return; }
   if (e.target.closest("[data-act='import']")){ $("#file").click(); return; }
+  const add = e.target.closest("[data-add]"); if (add){ addShot(add.dataset.add); return; }
+  const cam = e.target.closest("[data-cam]"); if (cam){ if (cam.dataset.pid) openSheet(cam.dataset.cam); else { photoTarget = cam.dataset.cam; $("#photoCam").click(); } return; }
   const card = e.target.closest(".card"); if (!card) return;
   if (e.target.closest(".chk")){ toggleDone(card.dataset.id); return; }
   openSheet(card.dataset.id);
@@ -526,7 +692,7 @@ list.addEventListener("click", e => {
 $("#chips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (!c) return; F.scene = c.dataset.s; saveUI(); render(); window.scrollTo({top:0}); });
 $("#filter").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; F.filter = b.dataset.f; saveUI(); render(); window.scrollTo({top:0}); });
 $("#bMenu").onclick = openMenu;
-$("#jump").onclick = () => { const el = list.querySelector(".card.next"); if (el) el.scrollIntoView({behavior:"smooth", block:"center"}); };
+$("#jump").onclick = () => { if (rolling){ stopTake(); return; } const el = list.querySelector(".card.next"); if (el) el.scrollIntoView({behavior:"smooth", block:"center"}); };
 backdrop.addEventListener("click", closeSheet);
 sheet.addEventListener("click", e => {
   const a = e.target.closest("[data-act]");
@@ -534,7 +700,16 @@ sheet.addEventListener("click", e => {
     const act = a.dataset.act;
     if (act === "close") closeSheet();
     else if (act === "import") $("#file").click();
-    else if (act === "addphoto") $("#photoIn").click();
+    else if (act === "startTake") startTake(sheetRow);
+    else if (act === "stopTake") stopTake();
+    else if (act === "addTake") takeEdit(r => r.takes.push({n:nextTakeNo(r), dur:0, good:false, note:"", at:Date.now()}));
+    else if (act === "addItem") addItem();
+    else if (act === "addphoto"){ photoTarget = sheetRow; $("#photoIn").click(); }
+    else if (act === "campho"){ photoTarget = sheetRow; $("#photoCam").click(); }
+    else if (act === "edit"){ const ta = sheet.querySelector("textarea.note"); if (ta) saveNote(ta.value); openEditor(sheetRow); }
+    else if (act === "saveedit") saveEditor();
+    else if (act === "canceledit") cancelEditor();
+    else if (act === "delshot") deleteShot(sheetRow);
     else if (act === "export") exportProject();
     else if (act === "reset") confirmSheet("Clear all check marks?", "Every shot goes back to not done, and statuses are cleared. On-set notes stay. You can undo this.", "Clear check marks", () => {
       const rows = P.scenes.flatMap(s => s.rows); pushUndo(rows); rows.forEach(r => { r.status = ""; r.doneAt = null; }); persist(); render(); toast("Cleared all check marks", true);
@@ -543,6 +718,10 @@ sheet.addEventListener("click", e => {
     return;
   }
   const ph = e.target.closest(".ph[data-pid]"); if (ph){ openViewer(ph.dataset.pid); return; }
+  const tg = e.target.closest("[data-take-good]"); if (tg){ const i = +tg.dataset.takeGood; takeEdit(r => { r.takes[i].good = !r.takes[i].good; }); return; }
+  const td = e.target.closest("[data-take-del]"); if (td){ const i = +td.dataset.takeDel; takeEdit(r => r.takes.splice(i, 1)); toast("Take removed", true); return; }
+  const ckb = e.target.closest("[data-ck]"); if (ckb){ const i = +ckb.dataset.ck; buzz(); takeEdit(r => { r.checklist[i].done = !r.checklist[i].done; }); return; }
+  const ckd = e.target.closest("[data-ck-del]"); if (ckd){ const i = +ckd.dataset.ckDel; takeEdit(r => r.checklist.splice(i, 1)); return; }
   const st = e.target.closest("[data-st]");
   if (st && sheetRow){ const id = sheetRow; const ta = sheet.querySelector("textarea.note"); if (ta) saveNote(ta.value); setStatus(id, st.dataset.st); render(); openSheet(id); return; }
   const nv = e.target.closest("[data-nav]");
@@ -552,6 +731,13 @@ sheet.addEventListener("click", e => {
   }
 });
 sheet.addEventListener("focusout", e => { if (e.target.matches && e.target.matches("textarea.note") && sheetRow) saveNote(e.target.value); });
+sheet.addEventListener("change", e => {
+  const t = e.target, f = sheetRow && findRow(sheetRow); if (!f) return;
+  if (t.dataset.takeDur != null){ const i = +t.dataset.takeDur; pushUndo([f.r]); f.r.takes[i].dur = Math.round(parseDur(t.value)); t.value = f.r.takes[i].dur ? fmtDur(f.r.takes[i].dur) : ""; persist(); render(); }
+  else if (t.dataset.takeNote != null){ const i = +t.dataset.takeNote; pushUndo([f.r]); f.r.takes[i].note = t.value.trim(); persist(); }
+  else if (t.dataset.ckText != null){ const i = +t.dataset.ckText; pushUndo([f.r]); const v = t.value.trim(); if (v) f.r.checklist[i].text = v; else f.r.checklist.splice(i, 1); persist(); render(); if (!v) openSheet(f.r.id, true); }
+});
+sheet.addEventListener("keydown", e => { if (e.target.id === "ckNew" && e.key === "Enter"){ e.preventDefault(); addItem(); } else if (e.target.matches && e.target.matches(".take input, .ck input") && e.key === "Enter"){ e.preventDefault(); e.target.blur(); } });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && sheet.classList.contains("show")) closeSheet();
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !(e.target && e.target.matches && e.target.matches("textarea,input"))){ e.preventDefault(); undo(); }
@@ -564,6 +750,7 @@ document.addEventListener("dragover", e => { if (e.dataTransfer && [...(e.dataTr
 document.addEventListener("drop", e => { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]){ e.preventDefault(); importFile(e.dataTransfer.files[0]); } });
 
 render();
+tick();
 initSync();
 })();
 </script>
